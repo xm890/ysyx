@@ -4,7 +4,7 @@ sim:
 		$(call git_commit, "sim RTL")
 		@echo "Write this Makefile by yourself."
 include ../Makefile
-TOPNAME = top
+TOPNAME = mux21
 NXDC_FILES = constr/top.nxdc
 INC_PATH ?=
 

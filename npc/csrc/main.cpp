@@ -13,50 +13,54 @@
 #include<assert.h>
 #include<nvboard.h>
 
-#include"Vtop.h"  
+#include"Vmux21.h"  
 #include"verilated.h"
 #include"verilated_vcd_c.h"
 
-void nvboard_bind_all_pins(Vtop* top);
-//void single_cycle(Vtop* top){
-//	top->clk=0;top->eval();
-//	top->clk=1;top->eval();
-//}
-//void reset(Vtop* top,int n){
-//	top->rst = 1;
-//	while(n-- > 0) 
-//		single_cycle(top);
-//	top->rst = 0;
-//}
+
+VerilatedContext* contextp = NULL;
+VerilatedVcdC* tfp = NULL;
+static Vmux21* top;
+void step_and_dump_wave(){
+	top->eval();
+	contextp->timeInc(1);
+	tfp->dump(contextp->time());
+}
+void sim_init(){
+	contextp = new VerilatedContext;
+	tfp = new VerilatedVcdC;
+	top = new Vmux21(contextp);
+	contextp->traceEverOn(true);
+	top->trace(tfp,0);
+	tfp->open("wave.vcd");
+}
+void sim_exit(){
+	step_and_dump_wave();
+	tfp->close();
+}
 int main(int argc, char** argv) {
-    VerilatedContext* contextp = new VerilatedContext;
-    contextp->traceEverOn(true);
+	sim_init();
     contextp->commandArgs(argc, argv);
 
-    Vtop* top = new Vtop{contextp};
-
-    nvboard_bind_all_pins(top);  
+//    nvboard_bind_all_pins(top);  
     nvboard_init();
 
-    VerilatedVcdC* m_trace = new VerilatedVcdC; 
-    top->trace(m_trace, 99);  
-    m_trace->open("wave.vcd");  
-//	reset(top,10);
 	int n = 100;    
     while (n-- > 0) {
 		nvboard_update();
 		int a = rand() &1;
 		int b = rand() &1;
-        contextp->timeInc(1);
+		if(n>50)
+			top->s = 0;
+		else 
+			top->s = 1;
 		top->a = a;
 		top->b = b;
-		top->eval();
-//		single_cycle(top);
-		printf("a=%d,b=%d,f=%d\n",a,b,top->f);
-		assert(top->f == (a^b));
-        m_trace->dump(contextp->time()); 
+		step_and_dump_wave();
+		printf("a=%d,b=%d,s=%d,y=%d\n",a,b,top->s,top->y);
+		assert(top->y == (~top->s&a)|(top->s&b));
     }
-    m_trace->close();
+	sim_exit();
     delete top;
     delete contextp;
     return 0;
