@@ -13,13 +13,13 @@
 #include<assert.h>
 #include<nvboard.h>
 
-#include"Vmux41.h"  
+#include"Vencoder_display.h"  
 #include"verilated.h"
 #include"verilated_vcd_c.h"
-static TOP_NAME mux41;
+static TOP_NAME encoder_display;
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
-static Vmux41* top;
+static Vencoder_display* top;
 void nvboard_bind_all_pins(TOP_NAME* top);
 void step_and_dump_wave(){
 	top->eval();
@@ -29,7 +29,7 @@ void step_and_dump_wave(){
 void sim_init(){
 	contextp = new VerilatedContext;
 	tfp = new VerilatedVcdC;
-	top = new Vmux41(contextp);
+	top = new Vencoder_display(contextp);
 	contextp->traceEverOn(true);
 	top->trace(tfp,0);
 	tfp->open("wave.vcd");
