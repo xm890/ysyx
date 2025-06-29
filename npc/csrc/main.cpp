@@ -13,13 +13,13 @@
 #include<assert.h>
 #include<nvboard.h>
 
-#include"Vencoder_display.h"  
+#include"Valu_top.h"  
 #include"verilated.h"
 #include"verilated_vcd_c.h"
-static TOP_NAME encoder_display;
+static TOP_NAME alu_top;
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
-static Vencoder_display* top;
+static Valu_top* top;
 void nvboard_bind_all_pins(TOP_NAME* top);
 void step_and_dump_wave(){
 	top->eval();
@@ -29,7 +29,7 @@ void step_and_dump_wave(){
 void sim_init(){
 	contextp = new VerilatedContext;
 	tfp = new VerilatedVcdC;
-	top = new Vencoder_display(contextp);
+	top = new Valu_top(contextp);
 	contextp->traceEverOn(true);
 	top->trace(tfp,0);
 	tfp->open("wave.vcd");
@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
     while (!contextp->gotFinish()) {
 		nvboard_update();
 		step_and_dump_wave();
+		printf("a_data=%d,b_data=%d,opmode=%d,result=%d,zero=%d,overflow=%d,carry=%d\n",top->sw & 0x0f,(top->sw>>4)&0x0f,top->btn&0x07,top->result,top->zero,top->overflow,top->carry);
     }
 	sim_exit();
     delete top;
