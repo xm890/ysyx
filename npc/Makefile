@@ -4,7 +4,7 @@ sim:
 		$(call git_commit, "sim RTL")
 		@echo "Write this Makefile by yourself."
 include ../Makefile
-TOPNAME = lfsr_top
+TOPNAME = ps2_keyboard_top
 NXDC_FILES = constr/top.nxdc
 INC_PATH ?=
 

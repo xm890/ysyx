@@ -13,14 +13,22 @@
 #include<assert.h>
 #include<nvboard.h>
 
-#include"Vlfsr_top.h"  
+#include"Vps2_keyboard_top.h"  
 #include"verilated.h"
 #include"verilated_vcd_c.h"
-static TOP_NAME lfsr_top;
+
+static TOP_NAME ps2_keyboard_top;
+vluint64_t reset_time = 0;
 VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
-static Vlfsr_top* top;
+static Vps2_keyboard_top* top;
 void nvboard_bind_all_pins(TOP_NAME* top);
+void top_reset(Vps2_keyboard_top *top, vluint64_t &reset_time){
+	top->sys_rst_n = 1;
+	if(reset_time >= 3 && reset_time <6){
+		top->sys_rst_n = 0;	
+	}	
+}
 void step_and_dump_wave(){
 	top->eval();
 	contextp->timeInc(1);
@@ -29,7 +37,7 @@ void step_and_dump_wave(){
 void sim_init(){
 	contextp = new VerilatedContext;
 	tfp = new VerilatedVcdC;
-	top = new Vlfsr_top(contextp);
+	top = new Vps2_keyboard_top(contextp);
 	contextp->traceEverOn(true);
 	top->trace(tfp,0);
 	tfp->open("wave.vcd");
@@ -44,11 +52,12 @@ int main(int argc, char** argv) {
 
     nvboard_bind_all_pins(top);  
     nvboard_init();
-
     while (!contextp->gotFinish()) {
+		top_reset(top,reset_time);
+		top->sys_clk ^=1;
 		nvboard_update();
 		step_and_dump_wave();
-		printf("lfsr_out1 = %d,lfsr_out2= %d,seg0=%d,seg1=%d\n",top->lfsr_out1,top->lfsr_out2,top->seg0,top->seg1);
+		reset_time++;
     }
 	sim_exit();
     delete top;
