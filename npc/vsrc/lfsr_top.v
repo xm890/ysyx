@@ -39,12 +39,12 @@ module lfsr_top
 
 bcd7seg	bcd7seg1_inst(
 	.bcd			(lfsr_out1),
-	.hex			(seg0[6:0])
+	.hex			(seg0[7:1])
 );
 
 bcd7seg	bcd7seg2_inst(
 	.bcd			(lfsr_out2),
-	.hex			(seg1[6:0])
+	.hex			(seg1[7:1])
 );
 lfsr	lfsr_inst(
 	.sys_clk		(btn[0]),
